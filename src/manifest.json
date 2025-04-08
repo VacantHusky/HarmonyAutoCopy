@@ -8,5 +8,9 @@
     "matches": ["<all_urls>"],
     "js": ["content.js"],
     "css": ["styles.css"]
-  }]
+  }],
+  "icons": {
+    "48": "icon48.svg",
+    "128": "icon128.svg"
+  }
 }

@@ -33,11 +33,19 @@ function removeToast(toast) {
   }
 }
 
+// 获取页面全部文本内容
+function getPageText() {
+  return document.body.innerText;
+}
+
 // 监听文本选择事件
-document.addEventListener('mouseup', async () => {
+document.addEventListener('mouseup', async (event) => {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
-  if (selectedText && selectedText.length > 0 && selection.type === 'Range') {
+  const isCtrlPressed = event.ctrlKey;
+  const isFullPageSelected = selectedText === getPageText().trim();
+  
+  if (selectedText && selectedText.length > 0 && selection.type === 'Range' && !(isCtrlPressed && isFullPageSelected)) {
     try {
       // 复制选中文本
       await navigator.clipboard.writeText(selectedText);
