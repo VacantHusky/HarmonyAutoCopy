@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HarmonyAutoCopy",
-  "version": "1.0",
+  "version": "1.1",
   "description": "自动复制选中的文本并显示MaterialDesign风格的提示",
   "permissions": ["clipboardWrite"],
   "content_scripts": [{

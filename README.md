@@ -1,6 +1,6 @@
 # HarmonyAutoCopy 🚀
 
-[![Version](https://img.shields.io/badge/version-1.0-blue.svg)]()
+[![Version](https://img.shields.io/badge/version-1.1-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)]()
 [![Chrome](https://img.shields.io/badge/chrome-compatible-brightgreen.svg)]()
 
@@ -11,6 +11,7 @@
 - 🔄 自动复制选中的文本
 - 🎨 美观的视觉反馈
 - ⚡ 轻量级，不影响浏览器性能
+- 🔒 支持临时屏蔽功能，点击插件图标即可开启/关闭自动复制
 
 ## 📦 安装
 
