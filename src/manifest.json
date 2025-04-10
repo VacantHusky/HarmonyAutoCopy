@@ -10,7 +10,20 @@
     "css": ["styles.css"]
   }],
   "icons": {
-    "48": "icon48.svg",
-    "128": "icon128.svg"
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_icon_disabled": {
+      "48": "icon48-disabled.png",
+      "128": "icon128-disabled.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
   }
 }

@@ -1,6 +1,24 @@
 // 提示消息队列
 let toasts = [];
 
+// 功能开关状态
+let isEnabled = true;
+
+// 初始化时获取状态
+chrome.runtime.sendMessage({type: 'getState'}, (response) => {
+  if (response) {
+    isEnabled = response.enabled;
+  }
+});
+
+// 监听状态变化消息
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === 'toggleState') {
+    isEnabled = message.enabled;
+  }
+});
+
+
 // 创建新的提示元素
 function createToast() {
   const toast = document.createElement('div');
@@ -45,7 +63,7 @@ document.addEventListener('mouseup', async (event) => {
   const isCtrlPressed = event.ctrlKey;
   const isFullPageSelected = selectedText === getPageText().trim();
   
-  if (selectedText && selectedText.length > 0 && selection.type === 'Range' && !(isCtrlPressed && isFullPageSelected)) {
+  if (isEnabled && selectedText && selectedText.length > 0 && selection.type === 'Range' && !(isCtrlPressed && isFullPageSelected)) {
     try {
       // 复制选中文本
       await navigator.clipboard.writeText(selectedText);
