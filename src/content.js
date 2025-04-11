@@ -5,29 +5,81 @@ let toasts = [];
 let isEnabled = true;
 
 // 初始化时获取状态
-chrome.runtime.sendMessage({type: 'getState'}, (response) => {
-  if (response) {
-    isEnabled = response.enabled;
+async function initState(retryCount = 0) {
+  // 检查扩展上下文是否有效
+  try {
+    if (!chrome.runtime?.id) {
+      // 扩展上下文已失效，静默使用默认状态
+      return false;
+    }
+    
+    const response = await chrome.runtime.sendMessage({type: 'getState'});
+    if (response && typeof response.enabled !== 'undefined') {
+      isEnabled = response.enabled;
+      return true;
+    }
+    // 无效响应时使用默认状态
+    return false;
+  } catch (error) {
+    // 处理扩展上下文失效错误
+    if (chrome.runtime?.lastError) {
+      const errorMessage = chrome.runtime.lastError.message;
+      if (errorMessage === 'Extension context invalidated.') {
+        // 扩展上下文已失效，静默使用默认状态
+        return false;
+      }
+      
+      // 只在第一次重试时输出调试信息
+      if (retryCount === 0) {
+        console.debug('状态同步初始化中...');
+      }
+    }
+    
+    // 重试逻辑，最多重试2次，减少重试次数
+    if (retryCount < 2) {
+      const delay = Math.min(1000 * (retryCount + 1), 2000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return initState(retryCount + 1);
+    }
+    
+    // 所有重试失败后，静默使用默认状态
+    return false;
   }
-});
+}
+
+initState();
 
 // 页面激活时同步状态
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible') {
-    chrome.runtime.sendMessage({type: 'getState'}, (response) => {
-      if (response) {
-        isEnabled = response.enabled;
-      }
-    });
+    await initState();
   }
 });
 
 // 监听状态变化消息
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.type === 'toggleState') {
-    isEnabled = message.enabled;
+try {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'toggleState') {
+      isEnabled = message.enabled;
+    }
+    return false; // 不需要保持消息通道开放
+  });
+} catch (error) {
+  // 静默处理监听器设置失败的情况
+  // 在扩展上下文失效时，保持默认功能可用
+}
+
+// 定期检查扩展状态，确保在扩展重新加载后能够恢复正确状态
+setInterval(async () => {
+  try {
+    if (document.visibilityState === 'visible' && chrome.runtime?.id) {
+      // 只在页面可见且扩展上下文有效时检查状态
+      await initState();
+    }
+  } catch (error) {
+    // 静默处理可能的错误，保持基本功能可用
   }
-});
+}, 60000); // 每分钟检查一次
 
 
 // 创建新的提示元素
