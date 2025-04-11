@@ -11,6 +11,17 @@ chrome.runtime.sendMessage({type: 'getState'}, (response) => {
   }
 });
 
+// 页面激活时同步状态
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    chrome.runtime.sendMessage({type: 'getState'}, (response) => {
+      if (response) {
+        isEnabled = response.enabled;
+      }
+    });
+  }
+});
+
 // 监听状态变化消息
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'toggleState') {

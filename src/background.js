@@ -25,11 +25,11 @@ chrome.action.onClicked.addListener(() => {
   isEnabled = !isEnabled;
   updateIcon(isEnabled);
   
-  // 向content script发送状态更新消息
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    if (tabs[0]) {
-      chrome.tabs.sendMessage(tabs[0].id, {type: 'toggleState', enabled: isEnabled});
-    }
+  // 向所有标签页发送状态更新消息
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, {type: 'toggleState', enabled: isEnabled});
+    });
   });
 });
 
