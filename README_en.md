@@ -15,11 +15,18 @@
 
 ## 📦 Installation
 
-1. Download the repository code
-2. Open Chrome browser and navigate to the extensions page (chrome://extensions/)
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked extension"
-5. Select the downloaded code folder
+### Edge Browser
+
+Install directly from the [Edge Add-ons Store](https://microsoftedge.microsoft.com/addons/detail/harmonyautocopy/nicjmjccokbepgflnhophhafopldbolb).
+
+### Chrome and Other Browsers
+
+1. Download the repository code (Click Code -> Download ZIP at the top of the page)
+2. Extract the downloaded ZIP file
+3. Open your browser and navigate to the extensions page (For Chrome: chrome://extensions/)
+4. Enable "Developer mode" in the top right corner
+5. Click "Load unpacked"
+6. Select the src folder from the extracted files
 
 ## 🎮 How to Use
 

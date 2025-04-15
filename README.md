@@ -15,11 +15,18 @@
 
 ## 📦 安装
 
-1. 下载此仓库的代码
-2. 打开Chrome浏览器，进入扩展程序页面（chrome://extensions/）
-3. 开启右上角的「开发者模式」
-4. 点击「加载已解压的扩展程序」
-5. 选择下载的代码文件夹
+### Edge 浏览器
+
+直接在 [Edge 扩展商店](https://microsoftedge.microsoft.com/addons/detail/harmonyautocopy/nicjmjccokbepgflnhophhafopldbolb) 安装。
+
+### Chrome 和其他浏览器
+
+1. 下载此仓库的代码（点击页面上方的 Code -> Download ZIP）
+2. 解压下载的 ZIP 文件
+3. 打开浏览器，进入扩展程序页面（Chrome 为 chrome://extensions/）
+4. 开启右上角的「开发者模式」
+5. 点击「加载已解压的扩展程序」
+6. 选择解压后的 src 文件夹
 
 ## 🎮 使用方法
 
