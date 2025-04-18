@@ -3,7 +3,8 @@
   "name": "HarmonyAutoCopy",
   "version": "1.2",
   "description": "自动复制选中的文本并显示MaterialDesign风格的提示",
-  "permissions": ["clipboardWrite"],
+  "permissions": ["clipboardWrite", "tabs", "storage"],
+  "default_locale": "en",
   "content_scripts": [{
     "matches": ["<all_urls>"],
     "js": ["content.js"],
@@ -14,6 +15,7 @@
     "128": "icon128.png"
   },
   "action": {
+    "default_popup": "popup.html",
     "default_icon": {
       "48": "icon48.png",
       "128": "icon128.png"

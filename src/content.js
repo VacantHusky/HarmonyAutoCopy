@@ -1,8 +1,17 @@
 // 提示消息队列
 let toasts = [];
 
-// 功能开关状态
-let isEnabled = true;
+async function getState() {
+  if (!chrome?.runtime?.id) {
+    return false;
+  }
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'getState' });
+    return response?.enabled;
+  } catch (error) {
+    return false;
+  }
+}
 
 // 初始化时获取状态
 async function initState(retryCount = 0) {
@@ -13,13 +22,9 @@ async function initState(retryCount = 0) {
       return false;
     }
     
-    const response = await chrome.runtime.sendMessage({type: 'getState'});
-    if (response && typeof response.enabled !== 'undefined') {
-      isEnabled = response.enabled;
-      return true;
-    }
-    // 无效响应时使用默认状态
-    return false;
+    // 绑定文字选中事件
+    initEvent();
+    return true;
   } catch (error) {
     // 处理扩展上下文失效错误
     if (chrome.runtime?.lastError) {
@@ -48,39 +53,6 @@ async function initState(retryCount = 0) {
 }
 
 initState();
-
-// 页面激活时同步状态
-document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible') {
-    await initState();
-  }
-});
-
-// 监听状态变化消息
-try {
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message.type === 'toggleState') {
-      isEnabled = message.enabled;
-    }
-    return false; // 不需要保持消息通道开放
-  });
-} catch (error) {
-  // 静默处理监听器设置失败的情况
-  // 在扩展上下文失效时，保持默认功能可用
-}
-
-// 定期检查扩展状态，确保在扩展重新加载后能够恢复正确状态
-setInterval(async () => {
-  try {
-    if (document.visibilityState === 'visible' && chrome.runtime?.id) {
-      // 只在页面可见且扩展上下文有效时检查状态
-      await initState();
-    }
-  } catch (error) {
-    // 静默处理可能的错误，保持基本功能可用
-  }
-}, 60000); // 每分钟检查一次
-
 
 // 创建新的提示元素
 function createToast() {
@@ -119,51 +91,57 @@ function getPageText() {
   return document.body.innerText;
 }
 
-// 监听文本选择事件
-document.addEventListener('mouseup', async (event) => {
-  const selection = window.getSelection();
-  const selectedText = selection.toString().trim();
-  const isCtrlPressed = event.ctrlKey;
-  const isFullPageSelected = selectedText === getPageText().trim();
-  
-  if (isEnabled && selectedText && selectedText.length > 0 && selection.type === 'Range' && !(isCtrlPressed && isFullPageSelected)) {
-    try {
-      // 复制选中文本
-      await navigator.clipboard.writeText(selectedText);
-      
-      // 创建新提示
-      const toast = createToast();
-      toasts.push(toast);
-      
-      // 更新所有提示的位置
-      updateToastPositions();
-      
-      // 显示提示
-      requestAnimationFrame(() => {
-        toast.classList.add('show');
-      });
-      
-      // 1.5秒后移除提示
-      setTimeout(() => {
-        removeToast(toast);
-      }, 1500);
-    } catch (error) {
-      console.error('复制失败:', error);
-      // 创建错误提示
-      const toast = createToast();
-      toast.textContent = '复制失败';
-      toast.style.backgroundColor = '#d32f2f';
-      toasts.push(toast);
-      
-      updateToastPositions();
-      
-      requestAnimationFrame(() => {
-        toast.classList.add('show');
-      });
-      
-      setTimeout(() => {
-        removeToast(toast);
-      }, 1500);
+function initEvent() {
+  // 监听文本选择事件
+  document.addEventListener('mouseup', async (event) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    const isCtrlPressed = event.ctrlKey;
+    const isFullPageSelected = selectedText === getPageText().trim();
+
+    // 在选中时实时获取状态
+    const isEnabled = await getState();
+    console.log('isEnabled:', isEnabled);
+
+    if (isEnabled && selectedText && selectedText.length > 0 && selection.type === 'Range' && !(isCtrlPressed && isFullPageSelected)) {
+      try {
+        // 复制选中文本
+        await navigator.clipboard.writeText(selectedText);
+
+        // 创建新提示
+        const toast = createToast();
+        toasts.push(toast);
+
+        // 更新所有提示的位置
+        updateToastPositions();
+
+        // 显示提示
+        requestAnimationFrame(() => {
+          toast.classList.add('show');
+        });
+
+        // 1.5秒后移除提示
+        setTimeout(() => {
+          removeToast(toast);
+        }, 1500);
+      } catch (error) {
+        console.error('复制失败:', error);
+        // 创建错误提示
+        const toast = createToast();
+        toast.textContent = '复制失败';
+        toast.style.backgroundColor = '#d32f2f';
+        toasts.push(toast);
+
+        updateToastPositions();
+
+        requestAnimationFrame(() => {
+          toast.classList.add('show');
+        });
+
+        setTimeout(() => {
+          removeToast(toast);
+        }, 1500);
+      }
     }
-  }
-});
+  });
+}

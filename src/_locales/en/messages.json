@@ -1,0 +1,26 @@
+{
+    "appTitle": {
+        "message": "HarmonyAutoCopy Settings"
+    },
+    "enablePlugin": {
+        "message": "Enable Plugin"
+    },
+    "modeLabel": {
+        "message": "Mode:"
+    },
+    "whitelist": {
+        "message": "Whitelist Mode"
+    },
+    "blacklist": {
+        "message": "Blacklist Mode"
+    },
+    "addDomain": {
+        "message": "Add Domain (Include subdomains):"
+    },
+    "addButton": {
+        "message": "Add"
+    },
+    "domainList": {
+        "message": "Domain List:"
+    }
+}

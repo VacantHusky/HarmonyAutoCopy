@@ -1,0 +1,26 @@
+{
+    "appTitle": {
+        "message": "HarmonyAutoCopy 设置"
+    },
+    "enablePlugin": {
+        "message": "启用插件"
+    },
+    "modeLabel": {
+        "message": "模式："
+    },
+    "whitelist": {
+        "message": "白名单模式"
+    },
+    "blacklist": {
+        "message": "黑名单模式"
+    },
+    "addDomain": {
+        "message": "添加域名（包含子域名）："
+    },
+    "addButton": {
+        "message": "添加"
+    },
+    "domainList": {
+        "message": "域名列表："
+    }
+}

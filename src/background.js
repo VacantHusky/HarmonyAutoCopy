@@ -1,5 +1,8 @@
-// 插件状态管理
-let isEnabled = true;
+// 获取设置
+async function getSettings() {
+  const { enabled = true, mode = 'whitelist', domains = [] } = await chrome.storage.local.get(['enabled', 'mode', 'domains']);
+  return { enabled, mode, domains };
+}
 
 // 更新图标状态
 function updateIcon(enabled) {
@@ -17,52 +20,58 @@ function updateIcon(enabled) {
   });
 }
 
-// 初始化图标状态
-updateIcon(isEnabled);
+// 初始化
+getSettings().then(({ enabled }) => {
+  updateIcon(enabled);
+});
 
-// 监听图标点击事件
-chrome.action.onClicked.addListener(() => {
-  isEnabled = !isEnabled;
-  updateIcon(isEnabled);
-  
-  // 向所有标签页发送状态更新消息
-  chrome.tabs.query({}).then(tabs => {
-    tabs.forEach(tab => {
-      try {
-        // 使用Promise处理发送消息可能的错误
-        chrome.tabs.sendMessage(tab.id, {type: 'toggleState', enabled: isEnabled})
-          .catch(error => {
-            // 静默处理错误，不影响其他标签页
-          });
-      } catch (error) {
-        // 忽略其他可能的错误
-      }
-    });
-  }).catch(error => {
-    // 处理tabs.query可能的错误
-    console.debug('无法查询标签页:', error);
-  });
+// 在设置变化时更新图标
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.enabled) {
+    updateIcon(changes.enabled.newValue);
+  }
 });
 
 // 监听content script的状态查询请求
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'getState') {
     try {
-      // 检查扩展上下文是否有效
-      if (chrome.runtime.id) {
-        sendResponse({enabled: isEnabled});
-        return true; // 保持消息通道开放
-      } else {
-        // 静默处理扩展上下文失效
-        sendResponse({enabled: true, fallback: true});
+      if (!chrome.runtime.id) {
+        sendResponse({ enabled: false, fallback: true, error: 'Extension context invalidated.' });
         return true;
       }
+  
+      chrome.storage.local.get(['enabled', 'mode', 'domains'], (result) => {
+        const enabled = result.enabled ?? true;
+        const mode = result.mode ?? 'whitelist';
+        const domains = result.domains ?? [];
+  
+        let siteEnabled = false;
+
+        if (enabled) {
+          try {
+            const url = new URL(sender?.url || sender?.tab?.url || '');
+            const hostname = url.hostname;
+    
+            if (mode === 'whitelist') {
+              siteEnabled = domains.some(domain => hostname.endsWith(domain));
+            } else if (mode === 'blacklist') {
+              siteEnabled = !domains.some(domain => hostname.endsWith(domain));
+            }
+          } catch (e) {
+            siteEnabled = true;
+          }
+        }
+
+        sendResponse({ enabled: enabled && siteEnabled });
+      });
+      return true;
     } catch (error) {
       // 捕获错误但不记录日志，减少不必要的错误提示
-      
+
       // 在错误情况下返回默认状态
       try {
-        sendResponse({enabled: true, fallback: true});
+        sendResponse({ enabled: false, fallback: true, error: error?.message || "Unknown error" });
         return true;
       } catch (e) {
         // 如果无法发送响应，静默失败
@@ -75,10 +84,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // 处理扩展安装或更新事件
 chrome.runtime.onInstalled.addListener(() => {
-  updateIcon(isEnabled);
+  getSettings().then(({ enabled }) => {
+    updateIcon(enabled);
+  });
 });
 
 // 处理扩展启动事件
 chrome.runtime.onStartup.addListener(() => {
-  updateIcon(isEnabled);
+  getSettings().then(({ enabled }) => {
+    updateIcon(enabled);
+  });
 });
