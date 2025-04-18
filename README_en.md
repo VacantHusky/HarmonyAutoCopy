@@ -12,6 +12,8 @@
 - 🎨 Beautiful visual feedback
 - ⚡ Lightweight, no impact on browser performance
 - 🔒 Temporary blocking feature - enable/disable auto-copy with one click on the extension icon
+- 🌏 Support multiple languages
+- 🚫 Supports blacklist/whitelist, turn on or off only the sites you want
 
 ## 📦 Installation
 
